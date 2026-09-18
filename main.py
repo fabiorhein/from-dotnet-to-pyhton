@@ -1,8 +1,11 @@
 import contextlib
 from collections.abc import AsyncGenerator
+
 from fastapi import FastAPI
-from src.shared.database import engine, Base
+
 from src.modules.users.api import router as users_router
+from src.shared.database import Base, engine
+
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:

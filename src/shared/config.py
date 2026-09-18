@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
-  
     DATABASE_URL: str
 
     model_config = SettingsConfigDict(
@@ -10,4 +10,5 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-settings = Settings()
+# Adicione o type: ignore aqui em baixo:
+settings = Settings()  # type: ignore[call-arg]

@@ -1,8 +1,11 @@
-from typing import Protocol
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from .models import User
 import uuid
+from typing import Protocol
+
+import sqlalchemy
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .models import User
+
 
 class IUserRepository(Protocol):
     async def get_by_email(self, email: str) -> User | None: ...
@@ -18,7 +21,7 @@ class SqlAlchemyUserRepository:
         self._session = session
 
     async def get_by_email(self, email: str) -> User | None:
-        query = select(User).where(User.email == email)
+        query = sqlalchemy.select(User).where(User.email == email)
         result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
@@ -26,12 +29,12 @@ class SqlAlchemyUserRepository:
         return await self._session.get(User, id)
 
     async def get_all(self) -> list[User]:
-        query = select(User)
+        query = sqlalchemy.select(User)
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
     async def get_all_without_inactive(self) -> list[User]:
-        query = select(User).where(User.is_active == True)
+        query = sqlalchemy.select(User).where(User.is_active == True)
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
