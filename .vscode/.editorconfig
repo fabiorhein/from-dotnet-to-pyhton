@@ -1,0 +1,19 @@
+{
+  // Aponta o VS Code para o ambiente virtual isolado que criamos
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  
+  // O equivalente a ligar o "Treat Warnings As Errors" no Roslyn do C#
+  "python.analysis.typeCheckingMode": "strict",
+  
+  // Formatação e Linting via Ruff (nosso ReSharper/EditorConfig)
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  
+  // Executa o Mypy em background para checagem estática profunda
+  "python.linting.mypyEnabled": true
+}
