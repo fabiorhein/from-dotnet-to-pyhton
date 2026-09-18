@@ -1,7 +1,9 @@
+import uuid
+
 from .models import User
 from .repositories import IUserRepository
 from .schemas import UserCreate, UserUpdate
-import uuid
+
 
 class UserService:
     def __init__(self, user_repository: IUserRepository):

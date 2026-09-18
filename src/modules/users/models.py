@@ -1,7 +1,10 @@
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Uuid
 import uuid
+
+from sqlalchemy import String, Uuid
+from sqlalchemy.orm import Mapped, mapped_column
+
 from src.shared.database import Base
+
 
 class User(Base):
     __tablename__ = "users"

@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
 import uuid
+
+from pydantic import BaseModel, ConfigDict, EmailStr
+
 
 # Request
 class UserCreate(BaseModel):

@@ -1,10 +1,13 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.shared.database import get_db
-from .schemas import UserCreate, UserUpdate, UserResponse, UserResponseEntire
+
 from .repositories import SqlAlchemyUserRepository
+from .schemas import UserCreate, UserResponse, UserResponseEntire, UserUpdate
 from .services import UserService
-import uuid
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
