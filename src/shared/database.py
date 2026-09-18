@@ -1,12 +1,10 @@
 from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
-
-# Connection string for the PostgreSQL database using asyncpg driver
-DATABASE_URL = "postgresql+asyncpg://app_user:app_password@localhost:5432/app_db"
+from src.shared.config import settings
 
 # Like DbContextOptions in EF Core, this is the base class for all models
-engine = create_async_engine(DATABASE_URL, echo=True, pool_size=10, max_overflow=20)
+engine = create_async_engine(settings.DATABASE_URL, echo=True, pool_size=10, max_overflow=20)
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
 
 class Base(DeclarativeBase):
