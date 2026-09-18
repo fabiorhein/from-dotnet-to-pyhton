@@ -56,10 +56,24 @@ The current `users` module demonstrates the separation:
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install fastapi uvicorn sqlalchemy asyncpg pydantic[email]
+python -m pip install fastapi uvicorn sqlalchemy asyncpg pydantic[email] pydantic-settings
 ```
 
-### 2. Start PostgreSQL with Docker
+### 2. Configure the environment
+
+Create a local `.env` file from the example and update the database connection string if needed:
+
+```bash
+cp .env.example .env
+```
+
+The application reads `DATABASE_URL` from `.env`. The example value is:
+
+```text
+postgresql+asyncpg://usuario:password@localhost:5432/database_name
+```
+
+### 3. Start PostgreSQL with Docker
 
 ```bash
 docker run --name from-dotnet-postgres \
@@ -70,7 +84,7 @@ docker run --name from-dotnet-postgres \
 	-d postgres:16
 ```
 
-### 3. Run the API
+### 4. Run the API
 
 ```bash
 uvicorn main:app --reload
@@ -78,11 +92,7 @@ uvicorn main:app --reload
 
 Open the interactive API documentation at <http://127.0.0.1:8000/docs>.
 
-The application creates the mapped tables during startup. The database connection currently defaults to:
-
-```text
-postgresql+asyncpg://app_user:app_password@localhost:5432/app_db
-```
+The application creates the mapped tables during startup using the `DATABASE_URL` value from `.env`.
 
 ## User API
 
