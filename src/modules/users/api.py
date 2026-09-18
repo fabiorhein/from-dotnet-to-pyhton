@@ -3,7 +3,11 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Importação com o nome exato que usamos no Depends
 from src.shared.database import get_db
+
+# Ajuste do caminho (verifique se uow precisa do prefixo src.)
+from src.shared.uow import SQLAlchemyUnitOfWork
 
 from .repositories import SqlAlchemyUserRepository
 from .schemas import UserCreate, UserResponse, UserResponseEntire, UserUpdate
@@ -11,9 +15,10 @@ from .services import UserService
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
-def get_user_service(session: AsyncSession = Depends(get_db)) -> UserService:
+async def get_user_service(session: AsyncSession = Depends(get_db)) -> UserService:
     repository = SqlAlchemyUserRepository(session)
-    return UserService(repository)
+    uow = SQLAlchemyUnitOfWork(session)
+    return UserService(user_repository=repository, uow=uow)
 
 @router.post("", response_model=UserResponse, status_code=201)
 async def create_user_endpoint(
@@ -37,27 +42,31 @@ async def get_user_by_email_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@router.get("/all", response_model=list[UserResponse])
+@router.get("/all", response_model=list[UserResponseEntire])
 async def get_all_users_endpoint(
     service: UserService = Depends(get_user_service)
-) -> list[UserResponse]:
+) -> list[UserResponseEntire]:
     users = await service.get_all_users()
-    return [UserResponse.model_validate(user) for user in users]
+    return [UserResponseEntire.model_validate(user) for user in users]
 
-@router.get("/all/without-inactive", response_model=list[UserResponseEntire])
+@router.get("/all/without-inactive", response_model=list[UserResponse])
 async def get_all_users_without_inactive_endpoint(
     service: UserService = Depends(get_user_service)
-) -> list[UserResponseEntire]:
+) -> list[UserResponse]:
     users = await service.get_all_users_without_inactive()
-    return [UserResponseEntire.model_validate(user) for user in users]
+    return [UserResponse.model_validate(user) for user in users]
 
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user_by_id_endpoint(
     user_id: uuid.UUID,
     service: UserService = Depends(get_user_service)
 ) -> UserResponse:
-    user = await service.get_user_by_id(user_id)
-    return UserResponse.model_validate(user)
+    # AQUI: Adicionado o tratamento de erro para retornar 404 em vez de 500
+    try:
+        user = await service.get_user_by_id(user_id)
+        return UserResponse.model_validate(user)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @router.put("", response_model=UserResponse)
 async def update_user_endpoint(
