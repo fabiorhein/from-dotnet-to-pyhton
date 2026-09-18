@@ -38,7 +38,8 @@ The current `users` module demonstrates the separation:
 | `services.py` | Business rules and use cases | Application service |
 | `repositories.py` | Queries, persistence, and session operations | Repository over `DbContext` |
 | `models.py` | Database entities and domain behavior | EF Core entities |
-| `shared/database.py` | Async engine, session factory, and transaction lifecycle | `DbContextOptions` + scoped `DbContext` |
+| `shared/database.py` | Async engine, session factory, and session dependency | `DbContextOptions` + scoped `DbContext` |
+| `shared/uow.py` | Commit and rollback abstraction for write operations | Unit of Work / transaction boundary |
 
 ### .NET mental model
 
@@ -46,7 +47,8 @@ The current `users` module demonstrates the separation:
 - `AsyncSession` is the closest equivalent to an EF Core `DbContext`.
 - SQLAlchemy `select()` replaces LINQ query expressions; `await session.execute()` executes them.
 - Pydantic models handle boundary validation and serialization; SQLAlchemy models represent persistence.
-- `flush()` makes changes available within the transaction; the request-scoped dependency commits or rolls back.
+- `flush()` makes changes available within the transaction; the service layer commits or rolls back through the Unit of Work.
+- Read operations use the request-scoped session, while write operations explicitly control their transaction boundary.
 
 ## Quick start
 
@@ -107,6 +109,8 @@ The sample module is available under `/api/users`:
 - `PATCH /api/users/{user_id}` - activate a user
 - `DELETE /api/users/{user_id}` - deactivate a user
 
+User lookup operations return `404 Not Found` when the requested user does not exist.
+
 ## Git strategy
 
 ```text
@@ -121,7 +125,9 @@ feature/*  ->  dev  ->  main
 
 ```text
 .
+├── pyproject.toml
 ├── main.py
+├── .env.example
 └── src
 		├── modules
 		│   └── users
@@ -131,6 +137,8 @@ feature/*  ->  dev  ->  main
 		│       ├── schemas.py
 		│       └── services.py
 		└── shared
-				└── database.py
+				├── config.py
+				├── database.py
+				└── uow.py
 
 ```
