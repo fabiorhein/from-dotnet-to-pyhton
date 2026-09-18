@@ -1,0 +1,3 @@
+[tool.ruff.lint.flake8-bugbear]
+# Informa ao Ruff que o Depends e outros recursos do FastAPI são seguros
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.Body"]
