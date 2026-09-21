@@ -1,6 +1,9 @@
+alembic==1.20.0
 annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1
+argon2-cffi==25.1.0
+argon2-cffi-bindings==26.1.0
 ast_serialize==0.11.2
 asyncpg==0.31.0
 attrs==26.1.0
@@ -23,6 +26,8 @@ idna==3.20
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 librt==0.15.0
+Mako==1.4.1
+MarkupSafe==3.0.3
 mcp==1.30.0
 mcp-types==2.2.0
 mypy==2.3.1
@@ -30,6 +35,7 @@ mypy_extensions==1.1.0
 opentelemetry-api==1.44.0
 pathspec==1.1.1
 psycopg2-binary==2.9.13
+pwdlib==0.3.1
 pycparser==3.0
 pydantic==2.13.5
 pydantic-settings==2.15.0
