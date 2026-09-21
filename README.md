@@ -58,7 +58,7 @@ The current `users` module demonstrates the separation:
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install fastapi uvicorn sqlalchemy asyncpg pydantic[email] pydantic-settings
+python -m pip install -r requirements.txt
 ```
 
 ### 2. Configure the environment
@@ -96,6 +96,19 @@ Open the interactive API documentation at <http://127.0.0.1:8000/docs>.
 
 The application creates the mapped tables during startup using the `DATABASE_URL` value from `.env`.
 
+### 5. Run the checks
+
+Run the linter and the type checker from the activated virtual environment:
+
+```bash
+ruff check .
+mypy --explicit-package-bases main.py src
+```
+
+The repository ignores the virtual environment, Python caches, local environment
+files, and tool caches. Keep `.env.example` versioned and create `.env` only for
+local configuration.
+
 ## User API
 
 The sample module is available under `/api/users`:
@@ -126,6 +139,7 @@ feature/*  ->  dev  ->  main
 ```text
 .
 ├── pyproject.toml
+├── requirements.txt
 ├── main.py
 ├── .env.example
 └── src
