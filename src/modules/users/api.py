@@ -1,12 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Importação com o nome exato que usamos no Depends
 from src.shared.database import get_db
-
-# Ajuste do caminho (verifique se uow precisa do prefixo src.)
+from src.shared.schemas import PageParams, PageResponse
 from src.shared.uow import SQLAlchemyUnitOfWork
 
 from .repositories import SqlAlchemyUserRepository
@@ -15,6 +13,8 @@ from .services import UserService
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
+
+# A função está definida logo abaixo no próprio arquivo:
 async def get_user_service(session: AsyncSession = Depends(get_db)) -> UserService:
     repository = SqlAlchemyUserRepository(session)
     uow = SQLAlchemyUnitOfWork(session)
@@ -31,16 +31,24 @@ async def create_user_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("", response_model=UserResponse)
+@router.get("/by-email", response_model=UserResponse)
 async def get_user_by_email_endpoint(
-    email: str,
-    service: UserService = Depends(get_user_service)
+    email: str, service: UserService = Depends(get_user_service)
 ) -> UserResponse:
     try:
         user = await service.get_user_by_email(email)
         return UserResponse.model_validate(user)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+# GET /api/users?page=1&size=10
+@router.get("", response_model=PageResponse[UserResponse])
+async def list_users_paginated(
+    page: int = Query(default=1, ge=1, description="Número da página"),
+    size: int = Query(default=10, ge=1, le=100, description="Tamanho da página"),
+    service: UserService = Depends(get_user_service),
+) -> PageResponse[UserResponse]:
+    return await service.get_paginated_users(page=page, size=size)
 
 @router.get("/all", response_model=list[UserResponseEntire])
 async def get_all_users_endpoint(
