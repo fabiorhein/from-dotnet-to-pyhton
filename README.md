@@ -39,6 +39,7 @@ The current `users` module demonstrates the separation:
 | `repositories.py` | Queries, persistence, and session operations | Repository over `DbContext` |
 | `models.py` | Database entities and domain behavior | EF Core entities |
 | `shared/database.py` | Async engine, session factory, and session dependency | `DbContextOptions` + scoped `DbContext` |
+| `shared/schemas.py` | Generic pagination request and response contracts | Shared pagination DTOs |
 | `shared/uow.py` | Commit and rollback abstraction for write operations | Unit of Work / transaction boundary |
 
 ### .NET mental model
@@ -49,6 +50,7 @@ The current `users` module demonstrates the separation:
 - Pydantic models handle boundary validation and serialization; SQLAlchemy models represent persistence.
 - `flush()` makes changes available within the transaction; the service layer commits or rolls back through the Unit of Work.
 - Read operations use the request-scoped session, while write operations explicitly control their transaction boundary.
+- Paginated reads return a reusable response contract with page metadata, similar to a shared pagination DTO in an ASP.NET Core API.
 
 ## Quick start
 
@@ -114,7 +116,8 @@ local configuration.
 The sample module is available under `/api/users`:
 
 - `POST /api/users` - register a user
-- `GET /api/users?email=...` - find a user by email
+- `GET /api/users/by-email?email=...` - find a user by email
+- `GET /api/users?page=1&size=10` - list users with pagination
 - `GET /api/users/{user_id}` - find a user by ID
 - `GET /api/users/all` - list users
 - `GET /api/users/all/without-inactive` - list active users
@@ -123,6 +126,26 @@ The sample module is available under `/api/users`:
 - `DELETE /api/users/{user_id}` - deactivate a user
 
 User lookup operations return `404 Not Found` when the requested user does not exist.
+
+The paginated users endpoint accepts the following query parameters:
+
+| Parameter | Default | Constraints | Description |
+| --- | ---: | --- | --- |
+| `page` | `1` | Minimum `1` | Page number |
+| `size` | `10` | Between `1` and `100` | Number of items per page |
+
+The response includes the users in `items` and the metadata fields `page`, `size`,
+`total_items`, and `total_pages`:
+
+```json
+{
+	"items": [],
+	"page": 1,
+	"size": 10,
+	"total_items": 0,
+	"total_pages": 0
+}
+```
 
 ## Git strategy
 
@@ -151,6 +174,7 @@ feature/*  ->  dev  ->  main
 		│       ├── schemas.py
 		│       └── services.py
 		└── shared
+				├── schemas.py
 				├── config.py
 				├── database.py
 				└── uow.py
