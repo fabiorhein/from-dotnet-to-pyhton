@@ -2,7 +2,7 @@ import math
 import uuid
 
 from src.shared.schemas import PageResponse
-
+from src.shared.security import get_password_hash
 from src.shared.uow import IUnitOfWork
 
 from .models import User
@@ -20,7 +20,15 @@ class UserService:
         if existing_user:
             raise ValueError("E-mail já cadastrado no sistema.")
 
-        new_user = User(name=dto.name, email=dto.email)
+        # Criptografa a senha antes de instanciar o modelo
+        hashed_pwd = get_password_hash(dto.password)
+
+        # Adiciona o hashed_password na criação da entidade
+        new_user = User(
+            name=dto.name, 
+            email=dto.email, 
+            hashed_password=hashed_pwd
+        )
         await self._user_repository.add(new_user)
         
         try:
