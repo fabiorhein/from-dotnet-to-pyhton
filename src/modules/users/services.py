@@ -1,10 +1,13 @@
+import math
 import uuid
+
+from src.shared.schemas import PageResponse
 
 from src.shared.uow import IUnitOfWork
 
 from .models import User
 from .repositories import IUserRepository
-from .schemas import UserCreate, UserUpdate
+from .schemas import UserCreate, UserResponse, UserUpdate
 
 
 class UserService:
@@ -48,6 +51,22 @@ class UserService:
 
     async def get_all_users_without_inactive(self) -> list[User]:
         return await self._user_repository.get_all_without_inactive()
+
+    async def get_paginated_users(self, page: int, size: int) -> PageResponse[UserResponse]:
+        items, total_items = await self._user_repository.get_paginated(page=page, size=size)
+
+        total_pages = math.ceil(total_items / size) if total_items > 0 else 0
+
+        # Mapeia as entidades de domínio/ORM para os DTOs de resposta do Pydantic
+        user_responses = [UserResponse.model_validate(user) for user in items]
+
+        return PageResponse[UserResponse](
+            items=user_responses,
+            page=page,
+            size=size,
+            total_items=total_items,
+            total_pages=total_pages,
+        )
 
     # ---------------------------------------------------------
     #                   Write methods
