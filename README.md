@@ -111,6 +111,52 @@ The repository ignores the virtual environment, Python caches, local environment
 files, and tool caches. Keep `.env.example` versioned and create `.env` only for
 local configuration.
 
+## MCP integration
+
+This project exposes two MCP server variants built with FastMCP:
+
+- `src/mcp/server.py` creates domain-specific tools directly against the application services and repository layer.
+- `src/mcp/openapi.py` reads the running FastAPI `openapi.json` and converts each API operation into an MCP tool automatically.
+
+### MCP Server (domain tools)
+
+This server exposes business-oriented actions for the user domain. Start it from the project root:
+
+```bash
+python src/mcp/server.py
+```
+
+Available tools:
+
+- `list_users(page: int = 1, size: int = 10)`
+- `find_user_by_email(email: str)`
+- `register_new_user(name: str, email: str)`
+
+These tools call the same application services and repository boundaries used by the HTTP API, which makes them a good fit for agentic workflows that need direct business operations.
+
+### MCP OpenAPI Server
+
+This server is useful when you want to expose the REST API itself as MCP tools without writing one tool per route by hand. It reads the FastAPI schema and registers every endpoint as an MCP callable.
+
+Typical startup flow:
+
+```bash
+uvicorn main:app --reload
+python src/mcp/openapi.py
+```
+
+The OpenAPI wrapper expects the API to be running at:
+
+- `http://127.0.0.1:8000/openapi.json`
+- `http://127.0.0.1:8000`
+
+This is ideal for tools that need to invoke the already-defined HTTP endpoints through an MCP client without extra application-specific plumbing.
+
+### Recommended usage
+
+- Use the domain MCP server when the agent should operate on business logic and database rules directly.
+- Use the OpenAPI MCP server when the agent needs to consume the public HTTP API as standard operations.
+
 ## User API
 
 The sample module is available under `/api/users`:
@@ -165,18 +211,22 @@ feature/*  ->  dev  ->  main
 ├── requirements.txt
 ├── main.py
 ├── .env.example
-└── src
-		├── modules
-		│   └── users
-		│       ├── api.py
-		│       ├── models.py
-		│       ├── repositories.py
-		│       ├── schemas.py
-		│       └── services.py
-		└── shared
-				├── schemas.py
-				├── config.py
-				├── database.py
-				└── uow.py
-
+├── src
+│   ├── mcp
+│   │   ├── __init__.py
+│   │   ├── openapi.py
+│   │   └── server.py
+│   ├── modules
+│   │   └── users
+│   │       ├── api.py
+│   │       ├── models.py
+│   │       ├── repositories.py
+│   │       ├── schemas.py
+│   │       └── services.py
+│   └── shared
+│       ├── __init__.py
+│       ├── config.py
+│       ├── database.py
+│       ├── schemas.py
+│       └── uow.py
 ```
