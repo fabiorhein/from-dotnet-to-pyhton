@@ -3,8 +3,8 @@ from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.modules.auth.api import router as auth_router
 
+from src.modules.auth.api import router as auth_router
 from src.modules.users.api import router as users_router
 from src.shared.database import Base, engine
 
@@ -22,13 +22,18 @@ app = FastAPI(
     description="Modular Monolith Backend"
 )
 
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # Ajuste para a porta do seu frontend
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(users_router)
 app.include_router(auth_router)
+app.include_router(users_router)
