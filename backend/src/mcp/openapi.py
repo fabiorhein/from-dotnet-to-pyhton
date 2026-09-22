@@ -23,8 +23,8 @@ def load_tools_from_openapi():
                 print(f"[Aviso] Não foi possível obter o OpenAPI de {FASTAPI_OPENAPI_URL}")
                 return
             openapi_spec = response.json()
-    except Exception as e:
-        print(f"[Aviso] FastAPI não parece estar rodando em {FASTAPI_BASE_URL}. Inicie o uvicorn primeiro! Erro: {e}")
+    except (httpx.HTTPError, ValueError) as error:
+        print(f"[Aviso] FastAPI não parece estar rodando em {FASTAPI_BASE_URL}. Inicie o uvicorn primeiro! Erro: {error!s}")
         return
 
     paths = openapi_spec.get("paths", {})
