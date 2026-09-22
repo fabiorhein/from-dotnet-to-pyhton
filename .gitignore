@@ -1,0 +1,146 @@
+# ==========================================
+# Ambientes Virtuais (Virtual Environments)
+# ==========================================
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+bin/
+lib/
+lib64/
+share/python-wheels/
+
+# ==========================================
+# Variáveis de Ambiente e Segredos
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+!.env.example
+
+# ==========================================
+# IDEs e Editores de Código
+# ==========================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+tempCodeRunnerFile.py
+
+# PyCharm / JetBrains
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text / Atom / Vim
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ==========================================
+# Python Bytecode e Cache de Compilação
+# ==========================================
+__pycache__/
+*.py[codz]
+*$py.class
+*.pyc
+*.so
+
+# ==========================================
+# Linters, Formatter, Type Checkers e Testes
+# ==========================================
+# Ruff, Mypy, Pytest, Coverage
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+.tox/
+.nox/
+.hypothesis/
+nosetests.xml
+coverage.xml
+*.cover
+
+# ==========================================
+# Gerenciadores de Pacotes Modernos
+# (UV, Poetry, PDM, Pixi, Pipenv)
+# ==========================================
+.pdm-python
+.pdm-build/
+.pixi/
+.pypackages__/
+# Se optar por ignorar arquivos de lock em bibliotecas:
+# uv.lock
+# poetry.lock
+# Pipfile.lock
+# pdm.lock
+
+# ==========================================
+# Build, Distribuição e Pacotes
+# ==========================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==========================================
+# Banco de Dados Local, Cache e Logs
+# ==========================================
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+*.db
+*.rdb
+*.aof
+
+# ==========================================
+# Jupyter Notebooks, AI & Data Science
+# ==========================================
+.ipynb_checkpoints
+*-checkpoint.py
+*.gdoc
+*.gslides
+*.gsheet
+# Ignore datasets locais pesados se necessário:
+# data/raw/
+# data/processed/
+
+# ==========================================
+# Sistema Operacional (OS Garbage)
+# ==========================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
