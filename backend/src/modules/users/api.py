@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.auth.dependencies import get_current_user
 from src.shared.database import get_db
-from src.shared.schemas import PageParams, PageResponse
+from src.shared.schemas import PageResponse
 from src.shared.uow import SQLAlchemyUnitOfWork
 
 from .models import User  # NOVO: Import do modelo para tipar o current_user

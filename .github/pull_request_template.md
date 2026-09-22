@@ -5,36 +5,62 @@ Allowed types: feat, fix, refactor, docs, test, chore
 Keep the title concise and under 72 characters when possible.
 -->
 
-## Why Is This PR Needed?
+## Summary
 
-<!-- Describe the problem, requirement, or context that motivated this pull request. -->
+<!-- What problem does this PR solve? What is the expected outcome? -->
 
 ## Changes
 
-<!-- List the relevant implementation changes. -->
+<!-- Describe the relevant backend, frontend, infrastructure, and documentation changes. -->
 
 -
 
-## Related Issues (optional)
+## User Experience
 
-<!-- Add links to related issues, discussions, or tasks when applicable. -->
+<!-- Complete when the PR changes the frontend or an API workflow. -->
+
+- User flow affected:
+- Screenshots or recording:
+- API endpoints affected:
+
+## Configuration and Data
+
+<!-- Mention environment variables, migrations, seed data, or deployment considerations. -->
+
+- Environment variables:
+- Database or migration impact:
+- Breaking changes:
 
 ## Validation
 
-<!-- Describe the checks you ran and include relevant details. -->
+<!-- Include the exact checks and manual verification performed. -->
 
-- [ ] Tests pass locally
-- [ ] Type checking or linting passes, when applicable
-- [ ] API behavior was verified, when applicable
+- [ ] Backend tests pass
+- [ ] Frontend tests or build pass
+- [ ] Ruff passes
+- [ ] MyPy passes
+- [ ] API behavior was verified
+- [ ] Frontend behavior was verified
+
+Commands and results:
+
+```text
+<!-- Example: backend/.venv/bin/ruff check . -> passed -->
+```
+
+## Related Issues
+
+<!-- Add links to related issues, discussions, or tasks when applicable. -->
 
 ## Review Notes
 
-<!-- Call out trade-offs, limitations, migrations, or areas that need special attention. -->
+<!-- Call out trade-offs, limitations, follow-up work, or areas needing special attention. -->
 
 ## Checklist
 
 - [ ] The branch targets the correct integration branch (`dev` for normal feature work)
 - [ ] The changes are focused and follow the project structure
-- [ ] Documentation was updated, if needed
+- [ ] Backend and frontend documentation were updated when needed
+- [ ] New or changed API contracts are documented
 - [ ] No credentials, secrets, or unrelated generated files are included
-- [ ] Breaking changes are clearly documented above
+- [ ] Breaking changes and migration requirements are clearly documented

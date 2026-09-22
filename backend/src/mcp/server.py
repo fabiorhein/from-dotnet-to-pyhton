@@ -1,16 +1,11 @@
-import sys
-from pathlib import Path
-
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
-from pydantic import EmailStr
+from sqlalchemy.exc import SQLAlchemyError
 
 from mcp.server.fastmcp import FastMCP
-from modules.users.repositories import SqlAlchemyUserRepository
-from modules.users.schemas import UserCreate
-from modules.users.services import UserService
-from shared.database import AsyncSessionLocal
-from shared.uow import SQLAlchemyUnitOfWork
+from src.modules.users.repositories import SqlAlchemyUserRepository
+from src.modules.users.schemas import UserCreate
+from src.modules.users.services import UserService
+from src.shared.database import AsyncSessionLocal
+from src.shared.uow import SQLAlchemyUnitOfWork
 
 # Instancia o servidor MCP usando FastMCP
 mcp = FastMCP("FromDotNetToPython-Users")
@@ -52,28 +47,29 @@ async def find_user_by_email(email: str) -> str:
         try:
             user = await service.get_user_by_email(email)
             return f"Usuário Encontrado: ID={user.id}, Nome={user.name}, Email={user.email}, Ativo={user.is_active}"
-        except ValueError as e:
-            return f"Erro na busca: {str(e)}"
+        except ValueError as error:
+            return f"Erro na busca: {error!s}"
 
 
 @mcp.tool()
-async def register_new_user(name: str, email: str) -> str:
+async def register_new_user(name: str, email: str, password: str) -> str:
     """Cadastra um novo usuário no sistema aplicando todas as validações de domínio.
     
     Args:
         name: Nome completo do novo usuário
         email: E-mail único e válido do usuário
+        password: Senha do usuário com pelo menos 6 caracteres
     """
     async with AsyncSessionLocal() as session:
         service = await _get_user_service_context(session)
         try:
-            dto = UserCreate(name=name, email=email)
+            dto = UserCreate(name=name, email=email, password=password)
             new_user = await service.register_user(dto)
             return f"Usuário cadastrado com sucesso! ID: {new_user.id}"
-        except ValueError as e:
-            return f"Falha no cadastro (Regra de Negócio): {str(e)}"
-        except Exception as e:
-            return f"Erro ao registrar usuário: {str(e)}"
+        except ValueError as error:
+            return f"Falha no cadastro (Regra de Negócio): {error!s}"
+        except SQLAlchemyError as error:
+            return f"Erro ao registrar usuário: {error!s}"
 
 
 if __name__ == "__main__":

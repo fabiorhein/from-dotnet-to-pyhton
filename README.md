@@ -7,7 +7,7 @@
 ![MCP](https://img.shields.io/badge/MCP-FastMCP-6E56CF)
 ![License](https://img.shields.io/badge/license-MIT-black)
 
-A practical backend learning project designed for .NET developers transitioning to Python. It brings the familiar concepts of ASP.NET Core, EF Core, and layered architecture into a clean FastAPI + SQLAlchemy implementation, while also exploring modern agentic patterns through MCP servers.
+A full-stack learning project designed for .NET developers transitioning to Python. It brings the familiar concepts of ASP.NET Core, EF Core, and layered architecture into a FastAPI + SQLAlchemy backend, with a Vue 3 frontend and MCP integrations.
 
 ## Why this project exists
 
@@ -32,11 +32,14 @@ The project is intentionally small but production-minded: clear abstractions, va
 - Pagination contract patterns
 - MCP server for business-domain tools
 - MCP server powered by FastAPI OpenAPI export
+- JWT authentication with hashed passwords
+- Vue 3 frontend with Vite, TypeScript, Pinia, Vue Router, and Tailwind CSS
+- Protected frontend routes for login and user management
 - Local database setup with Docker
 
 ## Architecture overview
 
-This project follows a modular monolith approach: each business module owns its HTTP layer, DTO contracts, business logic, repositories, and model definitions, while shared infrastructure stays centralized.
+This project follows a modular monolith approach in the backend: each business module owns its HTTP layer, DTO contracts, business logic, repositories, and model definitions, while shared infrastructure stays centralized. The frontend consumes the backend through its REST API.
 
 ```text
 HTTP request
@@ -50,14 +53,18 @@ FastAPI API --> Pydantic schemas --> Service --> Repository --> SQLAlchemy / Pos
 
 | Layer | Responsibility | .NET equivalent |
 | --- | --- | --- |
-| `src/modules/users/api.py` | Route definitions and HTTP responses | Controller / Minimal API |
-| `src/modules/users/schemas.py` | Request/response models | DTOs / model binding |
-| `src/modules/users/services.py` | Business rules and orchestration | Application service |
-| `src/modules/users/repositories.py` | Persistence and queries | Repository |
-| `src/modules/users/models.py` | Database entities | EF Core entities |
-| `src/shared/database.py` | Session factory and engine setup | DbContext configuration |
-| `src/shared/schemas.py` | Shared pagination contracts | Shared DTOs |
-| `src/shared/uow.py` | Transaction boundaries | Unit of Work |
+| `backend/src/modules/users/api.py` | Route definitions and HTTP responses | Controller / Minimal API |
+| `backend/src/modules/users/schemas.py` | Request/response models | DTOs / model binding |
+| `backend/src/modules/users/services.py` | Business rules and orchestration | Application service |
+| `backend/src/modules/users/repositories.py` | Persistence and queries | Repository |
+| `backend/src/modules/users/models.py` | Database entities | EF Core entities |
+| `backend/src/shared/database.py` | Session factory and engine setup | DbContext configuration |
+| `backend/src/shared/schemas.py` | Shared pagination contracts | Shared DTOs |
+| `backend/src/shared/uow.py` | Transaction boundaries | Unit of Work |
+| `frontend/src/modules/auth` | Login view and authentication flow | Client-side auth UI |
+| `frontend/src/modules/users` | User management views | Client-side feature module |
+| `frontend/src/services/api.ts` | Axios client and JWT handling | HTTP client |
+| `frontend/src/stores/auth.ts` | Authentication state and token persistence | Client-side state |
 
 ### .NET mental model in Python
 
@@ -81,38 +88,38 @@ FastAPI API --> Pydantic schemas --> Service --> Repository --> SQLAlchemy / Pos
 - Ruff
 - MyPy
 - MCP / FastMCP
+- Node.js and npm
+- Vue 3, Vite, TypeScript, Pinia, Vue Router, and Tailwind CSS
 
 ## Project structure
 
 ```text
 .
-├── .github
-│   └── pull_request_template.md
 ├── LICENSE
-├── main.py
-├── pyproject.toml
-├── requirements.txt
 ├── README.md
-├── .env.example
-├── src
-│   ├── mcp
-│   │   ├── __init__.py
-│   │   ├── openapi.py
-│   │   └── server.py
-│   ├── modules
-│   │   └── users
-│   │       ├── __init__.py
-│   │       ├── api.py
-│   │       ├── models.py
-│   │       ├── repositories.py
-│   │       ├── schemas.py
-│   │       └── services.py
-│   └── shared
-│       ├── __init__.py
-│       ├── config.py
-│       ├── database.py
-│       ├── schemas.py
-│       └── uow.py
+├── backend
+│   ├── .env.example
+│   ├── alembic.ini
+│   ├── main.py
+│   ├── migrations
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── src
+│       ├── mcp
+│       ├── modules
+│       │   ├── auth
+│       │   └── users
+│       └── shared
+└── frontend
+  ├── .env.example
+  ├── package.json
+  └── src
+    ├── modules
+    │   ├── auth
+    │   └── users
+    ├── router
+    ├── services
+    └── stores
 ```
 
 ## Prerequisites
@@ -126,30 +133,24 @@ Before running the project locally, make sure you have:
 
 ## Quick start
 
-### 1. Create the virtual environment
+### 1. Set up the backend
 
 ```bash
+cd backend
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-```
-
-### 2. Configure the environment
-
-Create a local environment file:
-
-```bash
 cp .env.example .env
 ```
 
-Then update the database connection string if needed. The application reads `DATABASE_URL` from the environment:
+Update the database connection string and `SECRET_KEY` in `backend/.env` if needed. The application reads `DATABASE_URL` from the environment:
 
 ```text
 postgresql+asyncpg://usuario:password@localhost:5432/database_name
 ```
 
-### 3. Start PostgreSQL with Docker
+### 2. Start PostgreSQL with Docker
 
 ```bash
 docker run --name from-dotnet-postgres \
@@ -160,9 +161,10 @@ docker run --name from-dotnet-postgres \
   -d postgres:16
 ```
 
-### 4. Run the API
+### 3. Run the API
 
 ```bash
+cd backend
 uvicorn main:app --reload
 ```
 
@@ -171,16 +173,39 @@ The API will be available at:
 - Swagger UI: http://127.0.0.1:8000/docs
 - OpenAPI schema: http://127.0.0.1:8000/openapi.json
 
-The application creates its mapped tables during startup using the configured `DATABASE_URL`.
+The application creates its mapped tables during startup using the configured `DATABASE_URL`. The API enables CORS for the default Vite development origins (`localhost:5173` and `127.0.0.1:5173`).
+
+### 4. Set up and run the frontend
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+`VITE_API_URL` defaults to `http://localhost:8000/api`. Change it in `frontend/.env` when the API uses another URL.
+
+The frontend is available at http://localhost:5173. The `/users` route requires a valid JWT and unauthenticated users are redirected to `/login`.
 
 ### 5. Run project checks
 
 ```bash
+cd backend
 ruff check .
 mypy --explicit-package-bases main.py src
 ```
 
-Keep `.env.example` versioned and use a local `.env` file only for machine-specific configuration.
+For frontend checks and a production build:
+
+```bash
+cd frontend
+npm run build
+```
+
+Keep both `.env.example` files versioned and use local `.env` files only for machine-specific configuration.
 
 ## MCP integration
 
@@ -188,35 +213,36 @@ This project includes two MCP server patterns built with FastMCP, each serving a
 
 ### 1. MCP domain server
 
-File: `src/mcp/server.py`
+File: `backend/src/mcp/server.py`
 
 This server exposes business-oriented tools directly against the application service and repository layer. It is useful when an agent should work with the system's actual business rules.
 
 Run it with:
 
 ```bash
-python src/mcp/server.py
+python -m src.mcp.server
 ```
 
 Available tools:
 
 - `list_users(page: int = 1, size: int = 10)`
 - `find_user_by_email(email: str)`
-- `register_new_user(name: str, email: str)`
+- `register_new_user(name: str, email: str, password: str)`
 
 This is the ideal option for use cases where the agent should operate close to the domain logic instead of through HTTP calls.
 
 ### 2. MCP OpenAPI server
 
-File: `src/mcp/openapi.py`
+File: `backend/src/mcp/openapi.py`
 
 This server reads the FastAPI OpenAPI document and creates MCP tools automatically for each API operation. It converts the public HTTP contract into tool-accessible actions without manually writing one tool per route.
 
 Typical startup flow:
 
 ```bash
+cd backend
 uvicorn main:app --reload
-python src/mcp/openapi.py
+python -m src.mcp.openapi
 ```
 
 It expects the API to be running at:
@@ -268,6 +294,25 @@ Supported query parameters:
 
 User lookup operations return `404 Not Found` if the requested record does not exist.
 
+## Authentication
+
+Authentication is provided by the backend at `POST /api/auth/token`. It accepts OAuth2 form data (`username` is the user's email and `password` is the user's password) and returns a JWT access token:
+
+```json
+{
+  "access_token": "<jwt>",
+  "token_type": "bearer"
+}
+```
+
+Protected user endpoints require the token in the request header:
+
+```text
+Authorization: Bearer <jwt>
+```
+
+The frontend login view submits these credentials, stores the token in `localStorage`, adds it to API requests, and redirects to `/login` after a `401 Unauthorized` response.
+
 ## Development workflow
 
 ### Git strategy
@@ -293,10 +338,10 @@ feature/*  ->  dev  ->  main
 Possible next steps for the project include:
 
 - additional business modules beyond users
-- authentication and authorization patterns
 - Docker Compose for full local environment orchestration
 - observability and structured logging
-- tests for repositories, services, and API endpoints
+- tests for repositories, services, API endpoints, and frontend flows
+- complete user management operations in the frontend
 - more advanced MCP integrations and tool chaining
 
 ## License
